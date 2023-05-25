@@ -47,6 +47,15 @@ func normalSSE(ctx *gin.Context) {
 	ctx.Header("Connection", "keep-alive")
 	ctx.Writer.Flush()
 	fmt.Println("normal start")
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			ctx.SSEvent("hi", "Normal Hi")
+			ctx.Writer.Flush()
+			ctx.SSEvent("ping", struct{}{})
+			ctx.Writer.Flush()
+		}
+	}()
 	<-ctx.Request.Context().Done()
 	fmt.Println("normal end")
 }
@@ -57,6 +66,15 @@ func polySSE(ctx *gin.Context) {
 	ctx.Header("Connection", "keep-alive")
 	ctx.Writer.Flush()
 	fmt.Println("poly start")
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			ctx.SSEvent("hi", "Poly Hi")
+			ctx.Writer.Flush()
+			ctx.SSEvent("ping", struct{}{})
+			ctx.Writer.Flush()
+		}
+	}()
 	<-ctx.Request.Context().Done()
 	fmt.Println("poly end")
 }
