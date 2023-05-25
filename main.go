@@ -36,6 +36,7 @@ func main() {
 	// 		time.Sleep(10 * time.Second)
 	// 	}
 	// }()
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowOrigins: []string{"http://localhost:5173"}}))
 	r.GET("/normal", normalSSE)
@@ -49,17 +50,26 @@ func normalSSE(ctx *gin.Context) {
 	ctx.Header("Connection", "keep-alive")
 	ctx.Writer.Flush()
 	fmt.Println("normal start")
+	done := make(chan struct{})
 	go func() {
 		for {
-			time.Sleep(10 * time.Second)
-			ctx.SSEvent("hi", "Normal Hi")
-			ctx.Writer.Flush()
-			ctx.SSEvent("ping", struct{}{})
-			ctx.Writer.Flush()
+			select {
+			case <-time.Tick(10 * time.Second):
+				ctx.SSEvent("hi", "Normal Hi")
+				ctx.Writer.Flush()
+				ctx.SSEvent("ping", struct{}{})
+				ctx.Writer.Flush()
+
+			case <-ctx.Request.Context().Done():
+				done <- struct{}{}
+				fmt.Println("normal done case")
+				return
+			}
+
 		}
+
 	}()
-	<-ctx.Request.Context().Done()
-	fmt.Println("normal end")
+	<-done
 }
 
 func polySSE(ctx *gin.Context) {
@@ -68,17 +78,24 @@ func polySSE(ctx *gin.Context) {
 	ctx.Header("Connection", "keep-alive")
 	ctx.Writer.Flush()
 	fmt.Println("poly start")
+	done := make(chan struct{})
 	go func() {
 		for {
-			time.Sleep(10 * time.Second)
-			ctx.SSEvent("hi", "Poly Hi")
-			ctx.Writer.Flush()
-			ctx.SSEvent("ping", struct{}{})
-			ctx.Writer.Flush()
+			select {
+			case <-time.Tick(10 * time.Second):
+				// ctx.SSEvent("hi", "Poly Hi")
+				// ctx.Writer.Flush()
+				ctx.SSEvent("ping", struct{}{})
+				ctx.Writer.Flush()
+			case <-ctx.Request.Context().Done():
+				done <- struct{}{}
+				fmt.Println("poly done case")
+				return
+			}
+
 		}
 	}()
-	<-ctx.Request.Context().Done()
-	fmt.Println("poly end")
+	<-done
 }
 func normalGET(ctx *gin.Context) {
 	fmt.Println("normalGET start")
