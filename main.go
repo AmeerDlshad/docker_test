@@ -4,38 +4,40 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	numbers := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
-	x := make(map[*string]int)
-	go func() {
-		for {
-			fmt.Println("start len", len(x))
-			pref := make([]*string, 0)
-			for i := 1; i <= 10; i++ {
-				p := &numbers[i-1]
-				pref = append(pref, p)
-				x[p] = i
-			}
-			fmt.Println("\n\nshowing\n----------")
-			for str, in := range x {
-				fmt.Println(*str, in)
-			}
-			fmt.Println("\n\ndeleting")
-			for j := 1; j <= 10; j++ {
-				delete(x, pref[j-1])
-			}
-			fmt.Println("\n\nafter delete show")
-			for str, in := range x {
-				fmt.Println(*str, in)
-			}
-			fmt.Println("end len", len(x))
-			time.Sleep(10 * time.Second)
-		}
-	}()
+	// numbers := []string{"one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"}
+	// x := make(map[*string]int)
+	// go func() {
+	// 	for {
+	// 		fmt.Println("start len", len(x))
+	// 		pref := make([]*string, 0)
+	// 		for i := 1; i <= 10; i++ {
+	// 			p := &numbers[i-1]
+	// 			pref = append(pref, p)
+	// 			x[p] = i
+	// 		}
+	// 		fmt.Println("\n\nshowing\n----------")
+	// 		for str, in := range x {
+	// 			fmt.Println(*str, in)
+	// 		}
+	// 		fmt.Println("\n\ndeleting")
+	// 		for j := 1; j <= 10; j++ {
+	// 			delete(x, pref[j-1])
+	// 		}
+	// 		fmt.Println("\n\nafter delete show")
+	// 		for str, in := range x {
+	// 			fmt.Println(*str, in)
+	// 		}
+	// 		fmt.Println("end len", len(x))
+	// 		time.Sleep(10 * time.Second)
+	// 	}
+	// }()
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{AllowOrigins: []string{"http://localhost:5173"}}))
 	r.GET("/normal", normalSSE)
 	r.GET("/poly", polySSE)
 	r.GET("/get", normalGET)
