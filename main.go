@@ -36,6 +36,7 @@ func main() {
 	// 		time.Sleep(10 * time.Second)
 	// 	}
 	// }()
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowOrigins: []string{"http://localhost:5173"}}))
@@ -55,6 +56,7 @@ func normalSSE(ctx *gin.Context) {
 		for {
 			select {
 			case <-time.Tick(10 * time.Second):
+				fmt.Println("sending normal")
 				ctx.SSEvent("hi", "Normal Hi")
 				ctx.Writer.Flush()
 				ctx.SSEvent("ping", struct{}{})
@@ -85,6 +87,7 @@ func polySSE(ctx *gin.Context) {
 			case <-time.Tick(10 * time.Second):
 				// ctx.SSEvent("hi", "Poly Hi")
 				// ctx.Writer.Flush()
+				fmt.Println("sending poly")
 				ctx.SSEvent("ping", struct{}{})
 				ctx.Writer.Flush()
 			case <-ctx.Request.Context().Done():

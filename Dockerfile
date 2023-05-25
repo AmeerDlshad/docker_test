@@ -1,6 +1,6 @@
-FROM golang:1.18.1 as builder
+FROM alpine:edge as builder
 # Define build env
-ENV GOOS linux
+RUN apk add --no-cache --update go gcc g++
 # Add a work directory
 WORKDIR /app
 # Cache and install dependencies
@@ -9,9 +9,10 @@ RUN go mod download
 # Copy app files
 COPY . .
 # Build app
-RUN go build -o app
 
-FROM debian:buster
+RUN CGO_ENABLED=1 GOOS=linux go build -o app
+
+FROM alpine:3.14
 # # Copy built binary from builder
 COPY --from=builder app .
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
