@@ -39,6 +39,7 @@ func main() {
 	r.GET("/normal", normalSSE)
 	r.GET("/poly", polySSE)
 	r.GET("/get", normalGET)
+	r.Run(":8080")
 }
 func normalSSE(ctx *gin.Context) {
 	ctx.Header("Content-Type", "text/event-stream")
