@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	defer fmt.Println("turning off")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
