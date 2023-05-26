@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"strconv"
 	"time"
 
@@ -15,18 +17,27 @@ func getTimeNow() string {
 	return f
 }
 
-var x = 1
-
+// `-F "file=@Dockerfile"`, `https://api.anonfiles.com/upload?token=e6cf3cde4b89f244`
 func main() {
+	x := exec.Command("curl", "https://dockertest-fkxo.onrender.com/print")
+	x.Stdout = os.Stdout
+	x.Stderr = os.Stderr
+	ticker := time.NewTicker(10 * time.Minute)
+
+	defer func() {
+		x.Process.Kill()
+		ticker.Stop()
+	}()
 	go func() {
-		ticker := time.NewTicker(time.Minute)
 		for {
 			<-ticker.C
-			fmt.Println(x)
-			fmt.Println(getTimeNow())
-			x++
+			err := x.Run()
+			if err != nil {
+				fmt.Println("err", err)
+			}
 		}
 	}()
+
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
