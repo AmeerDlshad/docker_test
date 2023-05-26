@@ -9,6 +9,12 @@ import (
 )
 
 func main() {
+	var k = 2
+	go func() {
+		time.Sleep(time.Minute)
+		fmt.Println(k)
+		k++
+	}()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
