@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -9,7 +11,6 @@ import (
 )
 
 func main() {
-	defer fmt.Println("turning off")
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
@@ -46,11 +47,19 @@ func sse(ctx *gin.Context) {
 	<-ctx.Request.Context().Done() //Context.Done() fires a signal when the request is done or gets canceled
 }
 
-var k = 2
+var k = func() int {
+	x, _ := os.ReadFile("f.txt")
+	y := string(x)
+	a, _ := strconv.Atoi(y)
+
+	return a
+}()
 
 func print(ctx *gin.Context) {
 	fmt.Println(k)
+	ctx.Writer.Write([]byte(strconv.Itoa(k)))
 	k++
+	os.WriteFile("f.txt", []byte(strconv.Itoa(k)), os.ModePerm)
 }
 
 func getRequest(ctx *gin.Context) {
