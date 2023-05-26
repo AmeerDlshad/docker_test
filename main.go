@@ -9,17 +9,12 @@ import (
 )
 
 func main() {
-	var k = 2
-	go func() {
-		time.Sleep(time.Minute)
-		fmt.Println(k)
-		k++
-	}()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
 	r.GET("/sse", sse)
 	r.GET("/get", getRequest)
+	r.GET("print", print)
 	r.Run(":8080")
 }
 
@@ -48,6 +43,13 @@ func sse(ctx *gin.Context) {
 		}
 	}()
 	<-ctx.Request.Context().Done() //Context.Done() fires a signal when the request is done or gets canceled
+}
+
+var k = 2
+
+func print(ctx *gin.Context) {
+	fmt.Println(k)
+	k++
 }
 
 func getRequest(ctx *gin.Context) {
