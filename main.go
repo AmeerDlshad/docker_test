@@ -19,18 +19,15 @@ func getTimeNow() string {
 
 // `-F "file=@Dockerfile"`, `https://api.anonfiles.com/upload?token=e6cf3cde4b89f244`
 func main() {
-	x := exec.Command("curl", "https://dockertest-fkxo.onrender.com/print")
-	x.Stdout = os.Stdout
-	x.Stderr = os.Stderr
-	ticker := time.NewTicker(10 * time.Minute)
 
-	defer func() {
-		x.Process.Kill()
-		ticker.Stop()
-	}()
+	ticker := time.NewTicker(5 * time.Second)
+
 	go func() {
 		for {
 			<-ticker.C
+			x := exec.Command("curl", "https://dockertest-fkxo.onrender.com/print")
+			x.Stdout = os.Stdout
+			x.Stderr = os.Stderr
 			err := x.Run()
 			if err != nil {
 				fmt.Println("err", err)
