@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"time"
 
@@ -10,7 +9,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+func getTimeNow() string {
+	t := time.Now().UTC().Add(3 * time.Hour)
+	f := t.Format("2006-01-02T15:04:05.000")
+	return f
+}
+
+var x = 1
+
 func main() {
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		for {
+			<-ticker.C
+			fmt.Println(x)
+			fmt.Println(getTimeNow())
+			x++
+		}
+	}()
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
@@ -47,19 +63,12 @@ func sse(ctx *gin.Context) {
 	<-ctx.Request.Context().Done() //Context.Done() fires a signal when the request is done or gets canceled
 }
 
-var k = func() int {
-	x, _ := os.ReadFile("f.txt")
-	y := string(x)
-	a, _ := strconv.Atoi(y)
-
-	return a
-}()
+var k = 1
 
 func print(ctx *gin.Context) {
 	fmt.Println(k)
 	ctx.Writer.Write([]byte(strconv.Itoa(k)))
 	k++
-	os.WriteFile("f.txt", []byte(strconv.Itoa(k)), os.ModePerm)
 }
 
 func getRequest(ctx *gin.Context) {
