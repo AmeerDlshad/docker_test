@@ -1,0 +1,5 @@
+# flyctl launch added from .gitignore
+**/*.sql
+**/*.db
+**/.vscode
+fly.toml

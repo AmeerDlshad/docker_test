@@ -1,14 +1,14 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
-	"os"
-	"os/exec"
 	"strconv"
 	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 func getTimeNow() string {
@@ -19,25 +19,24 @@ func getTimeNow() string {
 
 // `-F "file=@Dockerfile"`, `https://api.anonfiles.com/upload?token=e6cf3cde4b89f244`
 func main() {
-
-	ticker := time.NewTicker(10 * time.Minute)
-
-	go func() {
-		for {
-			<-ticker.C
-			x := exec.Command("curl", "https://dockertest-fkxo.onrender.com/print")
-			x.Stdout = os.Stdout
-			x.Stderr = os.Stderr
-			err := x.Run()
-			if err != nil {
-				fmt.Println("err", err)
-			}
-		}
-	}()
+	db, err := sql.Open("sqlite3", "./db.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = db.Ping()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	db.Exec("create table if not exists users(name text)")
+	// ticker := time.NewTicker(10 * time.Minute)
 
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{AllowAllOrigins: true}))
+	r.GET("/users", getUsers)
+	r.GET("/add", addUser)
 	r.GET("/sse", sse)
 	r.GET("/get", getRequest)
 	r.GET("print", print)
@@ -46,6 +45,35 @@ func main() {
 
 var users = 0
 
+func getUsers(ctx *gin.Context) {
+	db, err := sql.Open("sqlite3", "./db.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	rows, _ := db.Query("select * from users")
+	u := make([]any, 0)
+	for rows.Next() {
+		var x string
+		rows.Scan(&x)
+		u = append(u, x)
+	}
+
+	ctx.JSON(200, u)
+}
+func addUser(ctx *gin.Context) {
+	name := ctx.Query("u")
+	fmt.Println(name)
+	db, err := sql.Open("sqlite3", "./db.db")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	_, err = db.Exec("insert into users values(?)", name)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
 func sse(ctx *gin.Context) {
 	fmt.Println("SSE start")
 	users++

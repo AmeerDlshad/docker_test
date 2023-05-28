@@ -17,7 +17,7 @@ FROM alpine:3.14
 COPY --from=builder app .
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
-RUN apk add --no-cache --update curl
+# RUN apk add --no-cache --update curl
 
 # Expose port
 EXPOSE 8080
